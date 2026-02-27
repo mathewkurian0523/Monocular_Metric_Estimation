@@ -2,7 +2,7 @@
 
 import cv2
 
-from detection.detector import detect
+from detection.detector import detect_objects
 from geometry.reference_db import REFERENCE_DB
 from geometry.utils import bbox_height, bbox_width
 from geometry.scale_estimator import estimate_scale
