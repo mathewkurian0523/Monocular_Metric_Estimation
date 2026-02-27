@@ -1,54 +1,97 @@
+import cv2
+import json
 from ultralytics import YOLO
 
-# Load models once (fast)
-ref_model = YOLO("models/reference_detector.pt")
-target_model = YOLO("models/target_detector.pt")
+# --------------------------------------------------
+# CONFIG
+# --------------------------------------------------
+
+IMAGE_PATH = "sample_test_images/IMG_5789.jpg"
+
+REFERENCE_MODEL_PATH = "models/reference_detector.pt"
+TARGET_MODEL_PATH    = "models/target_detector.pt"
+
+CONF_THRESHOLD = 0.25
 
 REFERENCE_CLASSES = {"a4_paper", "coin", "debit_card"}
 
+# --------------------------------------------------
+# LOAD MODELS
+# --------------------------------------------------
 
-def parse_results(results):
+print("Loading models...")
+ref_model = YOLO(REFERENCE_MODEL_PATH)
+tgt_model = YOLO(TARGET_MODEL_PATH)
+
+# --------------------------------------------------
+# RUN INFERENCE
+# --------------------------------------------------
+
+def run_model(model, image, obj_type):
+    results = model(image, conf=CONF_THRESHOLD, verbose=False)[0]
+
     detections = []
-    r = results[0]
 
-    for box in r.boxes:
+    if results.boxes is None:
+        return detections
+
+    for box in results.boxes:
         cls_id = int(box.cls[0])
-        cls_name = r.names[cls_id]
+        cls_name = model.names[cls_id]
         conf = float(box.conf[0])
-        xyxy = box.xyxy[0].tolist()
+
+        x1, y1, x2, y2 = map(float, box.xyxy[0])
 
         detections.append({
             "class": cls_name,
+            "type": obj_type,
             "confidence": conf,
-            "bbox": xyxy
+            "bbox": [x1, y1, x2, y2]
         })
 
     return detections
 
 
-def run_inference(image_path):
+# --------------------------------------------------
+# MAIN
+# --------------------------------------------------
 
-    # 1️⃣ run both models
-    ref_results = ref_model(image_path)
-    target_results = target_model(image_path)
+print("Running inference...")
 
-    ref_dets = parse_results(ref_results)
-    target_dets = parse_results(target_results)
+img = cv2.imread(IMAGE_PATH)
 
-    # 2️⃣ remove reference objects from target detections
-    filtered_target = [
-        d for d in target_dets if d["class"] not in REFERENCE_CLASSES
-    ]
+ref_detections = run_model(ref_model, IMAGE_PATH, "reference")
+tgt_detections = run_model(tgt_model, IMAGE_PATH, "target")
 
-    # 3️⃣ merge (reference detections override target)
-    final_detections = ref_dets + filtered_target
+# Remove reference objects accidentally detected by target model
+filtered_targets = [
+    d for d in tgt_detections if d["class"] not in REFERENCE_CLASSES
+]
 
-    return final_detections
+final_detections = ref_detections + filtered_targets
+
+# --------------------------------------------------
+# PRINT JSON OUTPUT (SCALER INPUT)
+# --------------------------------------------------
+
+print("\nFINAL OUTPUT FOR SCALER:\n")
+print(json.dumps(final_detections, indent=2))
 
 
-if __name__ == "__main__":
-    image = "sample_test_images/testtest.jpg"
-    detections = run_inference(image)
+# --------------------------------------------------
+# OPTIONAL: DRAW RESULTS
+# --------------------------------------------------
 
-    import json
-print(json.dumps(detections, indent=2))
+for det in final_detections:
+    x1, y1, x2, y2 = map(int, det["bbox"])
+
+    color = (0,255,0) if det["type"]=="reference" else (255,0,0)
+    label = f"{det['class']} {det['confidence']:.2f}"
+
+    cv2.rectangle(img, (x1,y1), (x2,y2), color, 2)
+    cv2.putText(img, label, (x1, y1-5),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+
+cv2.imshow("Detections", img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()

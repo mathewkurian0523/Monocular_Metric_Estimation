@@ -1,6 +1,7 @@
 # tools/debug_visualize.py
 
 import cv2
+import os
 
 from detection.detector import detect_objects
 from geometry.reference_db import REFERENCE_DB
@@ -8,7 +9,8 @@ from geometry.scale_estimator import estimate_scale
 from geometry.measurement import measure_pixel_dimension
 
 
-IMAGE_PATH = "data/test_images/IMG_5795.jpg"  # change to any image
+IMAGE_PATH = os.getenv("SCENESCALE_IMAGE", "data/test_images/IMG_5789.jpg")
+DEBUG = os.getenv("SCENESCALE_DEBUG", "0") == "1"
 
 
 def draw_text(img, text, x, y, color=(0, 255, 0)):
@@ -45,9 +47,22 @@ def main():
 
     for det in detections:
         if det["is_reference"] and det["class"] in REFERENCE_DB:
+            ref_dimension = REFERENCE_DB[det["class"]].get("dimension", "height")
+            if ref_dimension == "width":
+                pixel_size = det["width_px"]
+            else:
+                pixel_size = det["height_px"]
+
+            if DEBUG:
+                print(
+                    f"[debug] ref class={det['class']} conf={det['confidence']:.3f} "
+                    f"pixel_size={pixel_size} req_dim={ref_dimension} "
+                    f"min_pixel={REFERENCE_DB[det['class']]['min_pixel_size']}"
+                )
+
             reference_objects.append({
                 "class": det["class"],
-                "pixel_size": det["reference_pixels"],
+                "pixel_size": pixel_size,
                 "confidence": det["confidence"]
             })
 

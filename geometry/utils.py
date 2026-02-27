@@ -1,6 +1,10 @@
-# geometry/utils.py
-
 import numpy as np
+import os
+
+try:
+    DEFAULT_REF_MIN_CONF = float(os.getenv("SCENESCALE_REF_MIN_CONF", "0.6"))
+except ValueError:
+    DEFAULT_REF_MIN_CONF = 0.6
 
 
 # -----------------------------
@@ -25,7 +29,7 @@ def bbox_area(bbox):
 # Reference Filtering
 # -----------------------------
 
-def is_valid_reference(obj, reference_db, min_confidence=0.6):
+def is_valid_reference(obj, reference_db, min_confidence=None):
     """
     Checks if detection qualifies as a reference object.
     """
@@ -36,6 +40,9 @@ def is_valid_reference(obj, reference_db, min_confidence=0.6):
 
     if cls not in reference_db:
         return False
+
+    if min_confidence is None:
+        min_confidence = DEFAULT_REF_MIN_CONF
 
     if confidence < min_confidence:
         return False
