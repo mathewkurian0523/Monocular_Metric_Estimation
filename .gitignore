@@ -208,3 +208,17 @@ __marimo__/
 
 # Project datasets
 datasets/
+
+# ML training outputs
+runs/
+weights/
+*.pt
+*.onnx
+*.engine
+
+# datasets (already good but keep)
+datasets/
+
+# prediction outputs
+predict/
+output/
