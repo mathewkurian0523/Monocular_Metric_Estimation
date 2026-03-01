@@ -39,6 +39,11 @@ def main():
     if not detections:
         print("No detections.")
         return
+    if DEBUG:
+        class_counts = {}
+        for det in detections:
+            class_counts[det["class"]] = class_counts.get(det["class"], 0) + 1
+        print(f"[debug] detections_by_class={class_counts}")
 
     # -----------------------------
     # Build reference objects

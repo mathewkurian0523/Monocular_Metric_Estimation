@@ -222,3 +222,5 @@ datasets/
 # prediction outputs
 predict/
 output/
+
+sample_test_images/
