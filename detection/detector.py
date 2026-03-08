@@ -187,7 +187,8 @@ def detect_objects(image_path: str) -> list:
             )
 
         try:
-            ref_results = _reference_model(image_path)[0]
+          
+            ref_results = _reference_model(str(image_path))[0]
             tgt_results = _target_model(image_path)[0]
         except Exception as e:
             raise RuntimeError(f"Detection failed: {str(e)}")

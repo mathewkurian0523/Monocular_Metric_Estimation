@@ -9,7 +9,7 @@ from geometry.scale_estimator import estimate_scale
 from geometry.measurement import measure_pixel_dimension
 
 
-IMAGE_PATH = os.getenv("SCENESCALE_IMAGE", "data/test_images/IMG_5789.jpg")
+IMAGE_PATH = "data/test_images/tatas.jpeg"
 DEBUG = os.getenv("SCENESCALE_DEBUG", "0") == "1"
 
 
