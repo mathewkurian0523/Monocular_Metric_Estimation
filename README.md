@@ -26,5 +26,5 @@ Industrial inspection
 Autonomous systems
 
 ## Result
-results/input_image.jpg
-results/output_image.jpg
+
+Results/Result_MME.png
