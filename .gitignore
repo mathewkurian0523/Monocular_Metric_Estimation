@@ -213,14 +213,47 @@ datasets/
 runs/
 weights/
 *.pt
+*.pth
 *.onnx
 *.engine
-
-# datasets (already good but keep)
-datasets/
 
 # prediction outputs
 predict/
 output/
 
 sample_test_images/
+
+# environments
+.venv/
+venv/
+
+# python cache
+__pycache__/
+
+# logs
+*.log# Project datasets
+datasets/
+
+# ML training outputs
+runs/
+weights/
+*.pt
+*.pth
+*.onnx
+*.engine
+
+# prediction outputs
+predict/
+output/
+
+sample_test_images/
+
+# environments
+.venv/
+venv/
+
+# python cache
+__pycache__/
+
+# logs
+*.log
